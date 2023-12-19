@@ -59,9 +59,18 @@ export interface FunctionArgCstNode extends CstNode {
 }
 
 export type FunctionArgCstChildren = {
-  functionCall?: (FunctionCallCstNode)[];
-  array?: (ArrayCstNode)[];
-  char?: (CharCstNode)[];
+  functionArgPart: (FunctionArgPartCstNode)[];
+};
+
+export interface FunctionArgPartCstNode extends CstNode {
+  name: "functionArgPart";
+  children: FunctionArgPartCstChildren;
+}
+
+export type FunctionArgPartCstChildren = {
+  functionCall?: FunctionCallCstNode[];
+  array?: ArrayCstNode[];
+  char?: CharCstNode[];
 };
 
 export interface ICstNodeVisitor<IN, OUT> extends ICstVisitor<IN, OUT> {
@@ -71,4 +80,5 @@ export interface ICstNodeVisitor<IN, OUT> extends ICstVisitor<IN, OUT> {
   char(children: CharCstChildren, param?: IN): OUT;
   escape(children: EscapeCstChildren, param?: IN): OUT;
   functionArg(children: FunctionArgCstChildren, param?: IN): OUT;
+  functionArgPart(children: FunctionArgPartCstChildren, param?: IN): OUT;
 }

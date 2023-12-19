@@ -13,4 +13,5 @@ export function generateParserDts() {
   const dtsString = generateCstDts(parser.getGAstProductions());
   const dtsPath = resolve(__dirname, "..", "src", "cst.d.ts");
   writeFileSync(dtsPath, dtsString);
+  console.log("Wrote dts to", dtsPath);
 }

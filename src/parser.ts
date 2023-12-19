@@ -105,17 +105,17 @@ export class MarkInParser extends CstParser {
   });
 
   private functionArg = this.RULE("functionArg", () => {
+    this.SUBRULE(this.functionArgPart);
+    this.MANY(() => {
+      this.SUBRULE1(this.functionArgPart);
+    });
+  });
+
+  private functionArgPart = this.RULE("functionArgPart", () => {
     this.OR([
       { ALT: () => this.SUBRULE(this.functionCall) },
       { ALT: () => this.SUBRULE(this.array) },
       { ALT: () => this.SUBRULE(this.char) },
     ]);
-    this.MANY(() => {
-      this.OR1([
-        { ALT: () => this.SUBRULE1(this.functionCall) },
-        { ALT: () => this.SUBRULE1(this.array) },
-        { ALT: () => this.SUBRULE1(this.char) },
-      ]);
-    });
   });
 }
