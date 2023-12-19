@@ -1,0 +1,27 @@
+{
+  "name": "markin",
+  "version": "0.1.0",
+  "description": "A markup language where the content to be marked is inside.",
+  "main": "MarkIn.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc --build tsconfig.json"
+  },
+  "dependencies": {
+    "typescript": "5.3.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Jah-On/MarkIn.git"
+  },
+  "keywords": [
+    "markup",
+    "javascript"
+  ],
+  "author": "John Schulz, stefnotch",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/Jah-On/MarkIn/issues"
+  },
+  "homepage": "https://github.com/Jah-On/MarkIn#readme"
+}

@@ -1,0 +1,14 @@
+{
+    "compilerOptions": {
+        "target": "ES6",
+        "module": "AMD",
+        "noImplicitAny": true,
+        "outFile": "./build/MarkIn.js"
+    },
+    "include": [
+        "src/*"
+    ],
+    "exclude": [
+        "node_modules"
+    ]
+}
