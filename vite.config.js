@@ -1,5 +1,6 @@
 import { resolve } from "path";
 import { defineConfig } from "vite";
+import { generateParserDts } from "./utils/gen_dts_signatures";
 
 export default defineConfig({
   build: {
@@ -17,4 +18,12 @@ export default defineConfig({
       external: [],
     },
   },
+  plugins: [
+    {
+      name: "postbuild-commands", // the name of your custom plugin. Could be anything.
+      closeBundle: () => {
+        generateParserDts();
+      },
+    },
+  ],
 });
