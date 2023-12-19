@@ -24,6 +24,7 @@
     "vitest": "^1.1.0"
   },
   "dependencies": {
-    "chevrotain": "^11.0.3"
+    "chevrotain": "^11.0.3",
+    "escape-string-regexp": "^5.0.0"
   }
 }
