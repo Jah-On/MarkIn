@@ -1,152 +1,197 @@
-export const tokenToFunction = new Map<string, Function>([
-    ["table", _table], ["left", _left], ["right", _right], ["image", _image], ["link", _link], 
-    ["linked", _linked], ["bold", _bold], ["italic", _italic], ["numbered", _numbered], 
-    ["bullet", _bullet], ["code-block", _codeBlock], ["heading", _heading], ["color", _color]
+import { createNode } from "./dom-utils";
+
+export const tokenToFunction = new Map<string, FunctionType>([
+  _map("link", [{ t: "string" }], _link),
+  _map("linked", [{ t: "string" }, { t: "element" }], _linked),
+  _map("image", [{ t: "string" }, { t: "string" }], _image),
+  _map("bold", [{ t: "element" }], _bold),
+  _map("italic", [{ t: "element" }], _italic),
+  _map("numbered", [{ t: "array", v: { t: "element" } }], _numbered),
+  _map("bullet", [{ t: "array", v: { t: "element" } }], _bullet),
+  _map("heading", [{ t: "number" }, { t: "element" }], _heading),
+  _map("codeBlock", [{ t: "string" }], _codeBlock),
+  _map("color", [{ t: "string" }, { t: "element" }], _color),
+  _map(
+    "table",
+    [{ t: "array", v: { t: "array", v: { t: "element" } } }],
+    _table
+  ),
+  _map("left", [{ t: "element" }], _left),
+  _map("right", [{ t: "element" }], _right),
+  _map("center", [{ t: "element" }], _center),
 ]);
 
-function _link(url: string){
-    let elem       = document.createElement("a");
-    elem.className = "markin-link";
-    elem.href      = url;
-    elem.innerText = url;
-    return elem;
-}
+// Sensible code
+export type FunctionArgumentType =
+  | { t: "string" }
+  | { t: "number" }
+  | { t: "boolean" }
+  | { t: "element" }
+  | { t: "array"; v: FunctionArgumentType }
+  | { t: "object"; v: Record<string, FunctionArgumentType> };
 
-function _linked(url:string, element: HTMLElement){
-    let elem       = document.createElement("a");
-    elem.className = "markin-linked";
-    elem.href      = url;
-    elem.appendChild(element);
-    return elem;
-}
-
-function _image(alt: string, image: string){
-    let elem       = document.createElement("img");
-    elem.className = "markin-image";
-    elem.src       = image;
-    elem.alt       = alt;
-    return elem;
-}
-
-function _bold(element: HTMLElement){
-    let elem       = document.createElement("strong");
-    elem.className = "markin-bold";
-    elem.appendChild(element);
-    return elem;
-}
-
-function _italic(element: HTMLElement){
-    let elem       = document.createElement("em");
-    elem.className = "markin-italic";
-    elem.appendChild(element);
-    return elem;
-}
-
-function _numbered(input: Array<HTMLElement>){
-    let returnElement       = document.createElement("ol");
-    returnElement.className = "markin-numbered";
-    for (const element of input){
-        let elem       = document.createElement("li");
-        elem.className = "markin-numbered-item";
-        elem.appendChild(element);
-        returnElement.appendChild(elem);
+type MapType<T extends FunctionArgumentType> = T extends { t: "string" }
+  ? string
+  : T extends { t: "number" }
+  ? number
+  : T extends { t: "boolean" }
+  ? boolean
+  : T extends { t: "element" }
+  ? HTMLElement
+  : T extends { t: "array" }
+  ? Array<MapType<T["v"]>>
+  : T extends { t: "object" }
+  ? {
+      [K in keyof T["v"]]: MapType<T["v"][K]>;
     }
-    return returnElement;
+  : never;
+
+type MapTypes<T extends FunctionArgumentType[]> = {
+  [K in keyof T]: MapType<T[K]>;
+};
+
+function _map<
+  // TS needs the const, otherwise it collapses the tuple into an array
+  const T extends FunctionArgumentType[],
+  U extends (...args: MapTypes<T>) => HTMLElement
+>(name: string, args: T, callback: U): [string, FunctionType] {
+  return [
+    name,
+    {
+      args,
+      callback: (...args: any) => callback(...args),
+    },
+  ];
 }
 
-function _bullet(input: Array<HTMLElement>){
-    let returnElement       = document.createElement("ul");
-    returnElement.className = "markin-bullet";
-    for (const element of input){
-        let elem       = document.createElement("li");
-        elem.className = "markin-bullet-item";
-        elem.appendChild(element);
-        returnElement.appendChild(elem);
+export type FunctionType = {
+  args: FunctionArgumentType[];
+  callback: (...args: any) => HTMLElement;
+};
+// End of entirely sensible and reasonable code
+
+function _link(url: string) {
+  return createNode("a", { href: url, classList: ["markin-link"] }, [url]);
+}
+
+function _linked(url: string, element: HTMLElement) {
+  return createNode("a", { href: url, classList: ["markin-linked"] }, [
+    element,
+  ]);
+}
+
+function _image(alt: string, image: string) {
+  return createNode(
+    "img",
+    { src: image, alt: alt, classList: ["markin-image"] },
+    []
+  );
+}
+
+function _bold(element: HTMLElement) {
+  return createNode("strong", { classList: ["markin-bold"] }, [element]);
+}
+
+function _italic(element: HTMLElement) {
+  return createNode("em", { classList: ["markin-italic"] }, [element]);
+}
+
+function _numbered(input: Array<HTMLElement>) {
+  return createNode(
+    "ol",
+    { classList: ["markin-numbered"] },
+    input.map((element) =>
+      createNode("li", { classList: ["markin-numbered-item"] }, [element])
+    )
+  );
+}
+
+function _bullet(input: Array<HTMLElement>) {
+  return createNode(
+    "ul",
+    { classList: ["markin-bullet"] },
+    input.map((element) =>
+      createNode("li", { classList: ["markin-bullet-item"] }, [element])
+    )
+  );
+}
+
+function _heading(size: number, element: HTMLElement) {
+  return createNode(
+    `h${size}` as any,
+    { classList: [`markin-heading-${size}`] },
+    [element]
+  );
+}
+
+function _codeBlock(input: string) {
+  return createNode("pre", { classList: ["markin-code-block"] }, [
+    createNode("code", { classList: ["markin-code-block-code"] }, [input]),
+  ]);
+}
+
+function _color(color: string, element: HTMLElement) {
+  return createNode("span", { style: { color: color } }, [element]);
+}
+
+function _table(input: Array<Array<HTMLElement>>) {
+  let returnElement = document.createElement("table");
+  returnElement.className = "markin-table";
+  for (const row of input) {
+    let rowElement = document.createElement("tr");
+    rowElement.className = "markin-row";
+    for (const cell of row) {
+      let cellElement = document.createElement("td");
+      cellElement.className = "markin-cell";
+      cellElement.appendChild(cell);
+      rowElement.appendChild(cellElement);
     }
-    return returnElement;
+    returnElement.appendChild(rowElement);
+  }
+  return returnElement;
 }
 
-function _heading(size: number, element: HTMLElement){
-    let elem  = document.createElement(`h${size}`);
-    elem.className = `markin-heading-${size}`;
-    elem.appendChild(element);
-    return elem;
+function _left(element: HTMLElement): HTMLElement {
+  let returnElement;
+  if (element.constructor.name == Text.name) {
+    element.style.textAlign = "left";
+    returnElement = element;
+  } else {
+    returnElement = document.createElement("div");
+    element.style.marginLeft = "0";
+    element.style.marginRight = "auto";
+    returnElement.appendChild(element);
+  }
+  returnElement.className = "markin-left";
+  return returnElement;
 }
 
-function _codeBlock(){
-    let elem       = document.createElement("pre");
-    // elem.className = "markin-code-block";
-    // elem.innerText = input;
-    return elem;
+function _right(element: HTMLElement): HTMLElement {
+  let returnElement;
+  if (element.constructor.name == Text.name) {
+    element.style.textAlign = "right";
+    returnElement = element;
+  } else {
+    returnElement = document.createElement("div");
+    element.style.marginLeft = "auto";
+    element.style.marginRight = "0";
+    returnElement.appendChild(element);
+  }
+  returnElement.className = "markin-right";
+  return returnElement;
 }
 
-function _color(color: string, element: HTMLElement){
-    let elem       = document.createElement("span");
-    elem.className = "markin-color";
-    elem.style.color = color;
-    elem.appendChild(element);
-    return elem;
+function _center(element: HTMLElement): HTMLElement {
+  let returnElement;
+  if (element.constructor.name == Text.name) {
+    element.style.textAlign = "center";
+    returnElement = element;
+  } else {
+    returnElement = document.createElement("div");
+    element.style.marginLeft = "auto";
+    element.style.marginRight = "auto";
+    returnElement.appendChild(element);
+  }
+  returnElement.className = "markin-center";
+  return returnElement;
 }
-
-function _table(input: Array<Array<HTMLElement>>){
-    let returnElement       = document.createElement("table");
-    returnElement.className = "markin-table";
-    for (const row of input){
-        let rowElement       = document.createElement("tr");
-        rowElement.className = "markin-row";
-        for (const cell of row){
-            let cellElement       = document.createElement("td");
-            cellElement.className = "markin-cell";
-            cellElement.appendChild(cell);
-            rowElement.appendChild(cellElement);
-        }
-        returnElement.appendChild(rowElement);
-    }
-    return returnElement;
-}
-
-function _left(element: HTMLElement) : HTMLElement {
-    let returnElement;
-    if (element.constructor.name == Text.name){
-        element.style.textAlign = "left";
-        returnElement           = element;
-    } else {
-        returnElement             = document.createElement("div");
-        element.style.marginLeft  = "0";
-        element.style.marginRight = "auto";
-        returnElement.appendChild(element);
-    }
-    returnElement.className = "markin-left";
-    return returnElement;
-}
-
-function _right(element: HTMLElement) : HTMLElement {
-    let returnElement;
-    if (element.constructor.name == Text.name){
-        element.style.textAlign = "right";
-        returnElement           = element;
-    } else {
-        returnElement             = document.createElement("div");
-        element.style.marginLeft  = "auto";
-        element.style.marginRight = "0";
-        returnElement.appendChild(element);
-    }
-    returnElement.className = "markin-right";
-    return returnElement;
-}
-
-function _center(element: HTMLElement) : HTMLElement {
-    let returnElement;
-    if (element.constructor.name == Text.name){
-        element.style.textAlign = "center";
-        returnElement           = element;
-    } else {
-        returnElement             = document.createElement("div");
-        element.style.marginLeft  = "auto";
-        element.style.marginRight = "auto";
-        returnElement.appendChild(element);
-    }
-    returnElement.className = "markin-center";
-    return returnElement;
-}
-

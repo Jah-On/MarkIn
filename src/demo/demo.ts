@@ -1,6 +1,5 @@
 import { MarkInVisitor } from "../html-converter";
 import { markinParse } from "../main";
-import { MarkInParser, markinLexer } from "../parser";
 
 const demoInputElement = document.getElementById(
   "demo-input"
@@ -11,8 +10,8 @@ const parserOutputElement = document.getElementById(
 ) as HTMLElement;
 
 const demoInput = `
-heading[1,aitalics[b]]
-table[[tic, tac, toe],[second row, a, b]]
+heading[1,aitalic[b]]
+table[[[tic, tac, toe],[second row, a, b]]]
 heading[1,This is a heading with bold[bold text]!]
 `;
 
