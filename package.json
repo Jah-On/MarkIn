@@ -1,27 +1,30 @@
 {
   "name": "markin",
-  "version": "0.1.0",
-  "description": "A markup language where the content to be marked is inside.",
-  "main": "MarkIn.js",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "module": "./dist/markin.js",
+  "exports": {
+    ".": {
+      "import": "./dist/markin.js"
+    }
+  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tsc --build tsconfig.json"
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "test": "vitest"
+  },
+  "devDependencies": {
+    "typescript": "^5.2.2",
+    "vite": "^5.0.8",
+    "vitest": "^1.1.0"
   },
   "dependencies": {
-    "typescript": "5.3.3"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Jah-On/MarkIn.git"
-  },
-  "keywords": [
-    "markup",
-    "javascript"
-  ],
-  "author": "John Schulz, stefnotch",
-  "license": "GPL-3.0",
-  "bugs": {
-    "url": "https://github.com/Jah-On/MarkIn/issues"
-  },
-  "homepage": "https://github.com/Jah-On/MarkIn#readme"
+    "chevrotain": "^11.0.3",
+    "escape-string-regexp": "^5.0.0"
+  }
 }
