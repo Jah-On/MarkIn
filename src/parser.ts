@@ -4,18 +4,21 @@ import { functions as functionNames } from "./MarkIn.ts";
 
 const FunctionAndBracket = createToken({
   name: "Function",
-  pattern: { exec: matchFunction },
+  pattern: new RegExp(
+    `(${functionNames.map((name) => escapeStringRegexp(name)).join("|")})\\[`
+  ),
   line_breaks: false,
 });
 
 /**
  * https://unicode.org/reports/tr31/
  */
-function matchFunction(str: string, startOffset: number): any | null {
-  const value = str.substring(startOffset);
-  const match = /^\p{ID_Start}\p{ID_Continue}*\[/u.exec(value);
-  return match;
-}
+//pattern: { exec: matchFunction },
+// function matchFunction(str: string, startOffset: number): any | null {
+//   const value = str.substring(startOffset);
+//   const match = /^\p{ID_Start}\p{ID_Continue}*\[/u.exec(value);
+//   return match;
+// }
 
 const LSquareBracket = createToken({
   name: "LSquareBracket",
@@ -42,15 +45,8 @@ const AnyToken = createToken({
   pattern: /[^a]|a/,
 });
 
-const WhiteSpace = createToken({
-  name: "WhiteSpace",
-  pattern: /\s+/,
-  group: Lexer.SKIPPED,
-});
-
 // Token order matters
 const tokens = [
-  WhiteSpace,
   LSquareBracket,
   RSquareBracket,
   EscapeToken,
