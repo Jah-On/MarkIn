@@ -182,6 +182,7 @@ export class MarkInVisitor
   }
   array(children: ArrayCstChildren, _param?: null | undefined): Element {
     // TODO: Print array contents
+    console.log(children);
     return createErrorElement("Array needs to be handled by function call");
   }
   char(children: CharCstChildren, _param?: null | undefined): Element {
