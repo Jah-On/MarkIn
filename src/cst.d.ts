@@ -1,12 +1,21 @@
 import type { CstNode, ICstVisitor, IToken } from "chevrotain";
 
+export interface AsciimathCstNode extends CstNode {
+  name: "asciimath";
+  children: AsciimathCstChildren;
+}
+
+export type AsciimathCstChildren = {
+  AsciiMathToken: IToken[];
+};
+
 export interface MarkinCstNode extends CstNode {
   name: "markin";
   children: MarkinCstChildren;
 }
 
 export type MarkinCstChildren = {
-  functionArg: FunctionArgCstNode[];
+  functionArg?: FunctionArgCstNode[];
 };
 
 export interface FunctionCallCstNode extends CstNode {
@@ -68,12 +77,14 @@ export interface FunctionArgPartCstNode extends CstNode {
 }
 
 export type FunctionArgPartCstChildren = {
+  asciimath?: AsciimathCstNode[];
   functionCall?: FunctionCallCstNode[];
   array?: ArrayCstNode[];
   char?: CharCstNode[];
 };
 
 export interface ICstNodeVisitor<IN, OUT> extends ICstVisitor<IN, OUT> {
+  asciimath(children: AsciimathCstChildren, param?: IN): OUT;
   markin(children: MarkinCstChildren, param?: IN): OUT;
   functionCall(children: FunctionCallCstChildren, param?: IN): OUT;
   array(children: ArrayCstChildren, param?: IN): OUT;

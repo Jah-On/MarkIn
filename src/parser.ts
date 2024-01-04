@@ -40,6 +40,11 @@ const CommaToken = createToken({
   pattern: /,/,
 });
 
+const AsciiMathToken = createToken({
+  name: "AsciiMathToken",
+  pattern: /`.*`/,
+});
+
 const AnyToken = createToken({
   name: "Any",
   pattern: /[^a]|a/,
@@ -47,6 +52,7 @@ const AnyToken = createToken({
 
 // Token order matters
 const tokens = [
+  AsciiMathToken,
   LSquareBracket,
   RSquareBracket,
   EscapeToken,
@@ -61,9 +67,17 @@ export class MarkInParser extends CstParser {
     super(tokens, {});
     this.performSelfAnalysis();
   }
+
+  private asciimath = this.RULE("asciimath", () => {
+    this.CONSUME(AsciiMathToken);
+  });
+
   // Example https://github.com/Chevrotain/chevrotain/blob/master/examples/implementation_languages/typescript/typescript_json.ts
   public markin = this.RULE("markin", () => {
-    this.SUBRULE(this.functionArg);
+    this.OR([
+      // { ALT: () => this.SUBRULE(this.asciimath) },
+      { ALT: () => this.SUBRULE(this.functionArg) },
+    ]);
   });
 
   private functionCall = this.RULE("functionCall", () => {
@@ -109,6 +123,7 @@ export class MarkInParser extends CstParser {
 
   private functionArgPart = this.RULE("functionArgPart", () => {
     this.OR([
+      { ALT: () => this.SUBRULE(this.asciimath) },
       { ALT: () => this.SUBRULE(this.functionCall) },
       { ALT: () => this.SUBRULE(this.array) },
       { ALT: () => this.SUBRULE(this.char) },
